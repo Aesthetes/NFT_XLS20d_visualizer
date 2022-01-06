@@ -1,0 +1,56 @@
+[METADATA]
+modified = 2021-11-24T00:00:00.000Z
+
+[[ACCOUNTS]]
+address = "rU5RuywZvguLWY2osbPEBHHU18rLf2Swf4"
+desc = "Testnet Wallet #1"
+network = "testnet"
+
+[[ACCOUNTS]]
+address = "rMp1zbKWYiSVJ535tLjV9B1PaHyXiS5TxU"
+desc = "Mainnet Wallet #1"
+network = "main"
+
+[[ACCOUNTS]]
+address = "rMmy5Rf42akjB7N98vUJhfqjmytyQYTzDe"
+desc = "Mainnet Wallet #2"
+network = "main"
+
+[[ACCOUNTS]]
+address = "r9cVMgXPyURVVBHPzZtxfZaWXG7wC7U1UX"
+desc = "XLS20d Wallet #1"
+network = "XLS20d"
+
+[[ACCOUNTS]]
+address = "rsJyN2X7wdn8M7BiMFL5yc9E1HGyyenWrr"
+desc = "XLS20d Wallet #2"
+network = "XLS20d"
+
+[[PRINCIPALS]]
+name = "contact us!"
+email = "info@aesthetes.art"
+
+[[VALIDATORS]]
+public_key = "nHU3AenyRuJ4Yei4YHkh6frZg8y2RwXznkMAomUE1ptV5Spvqsih"
+attestation="B289DC0C6435AC8DDFA1492205661EE2C2C43F4E179385607A8E07193A7896C2005484E2606E164D0C1222DD40914D339DA7E1D21D0895E86F6521DA70BBF200"
+network = "main"
+owner_country = "it"
+server_country = "eu"
+unl = "https://vl.xrplf.org"
+
+[URI_RESOLUTION] #accessed in order
+list = [
+  "https://gateway.pinata.cloud/ipfs/{:cid:}{:path:}",
+  "https://ipfs.infura.io/ipfs/{:cid:}{:path:}",
+  "https://ipfs.io/ipfs/{:cid:}{:path:}",
+  "./.nfts/00/{:path:}"
+]
+
+[IMMUTABLE_SOURCES]
+list = [
+  "^https:\\/\\/gateway\\.pinata\\.cloud\\/ipfs\\/(\\{:[\\w]+:\\})+$",
+  "^https:\\/\\/ipfs\\.infura\\.io\\/ipfs\\/(\\{:[\\w]+:\\})+$",
+  "^https:\\/\\/ipfs\\.io\\/ipfs\\/(\\{:[\\w]+:\\})+$"
+]
+
+

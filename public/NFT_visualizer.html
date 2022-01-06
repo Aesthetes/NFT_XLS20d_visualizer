@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- http-server --cors -c-1 -->
+  <script src="https://unpkg.com/ripple-lib@1.10.0/build/ripple-latest-min.js"></script>
+  <script src="https://unpkg.com/xrpl@2.1.0-beta.1/build/xrpl-latest-min.js"></script>
+  
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  
+  <script src="./scripts/external/toml_bundle.js"></script>
+  
+  <!-- <script type="module" src="scripts/xls16d/NFT_visualizer.mjs"></script> -->
+  <script type="module" src="scripts/xls20d/NFT_visualizer.mjs"></script>
+</head>
+<body>
+<h2>Visualize an NFT!</h2>
+<p>	
+  <input type="radio" name="ripple_network" value="Testnet" >
+  <label for="Testnet">Testnet</label>
+  <input type="radio" name="ripple_network" value="Mainnet" >
+  <label for="Mainnet">Mainnet</label>
+  <input type="radio" name="ripple_network" value="XLS20d" checked>
+  <label for="XLS20d">XLS-20d</label>
+</p>
+<p>
+  Address of the NFT Issuer/Owner: <input type="text" id="nft_owner_address" size="40" value="r9cVMgXPyURVVBHPzZtxfZaWXG7wC7U1UX" /><br>
+  Identifier of the NFT: <input type="text" id="nft_id" size="70" value="000800005E773C5E1C95D837F112D08AE5D6341CFDF2E7D2727D197600000005" /><br>
+</p>
+<p>
+  <button id="visualize_button">Visualize!</button>
+</p>
+<p>
+  <img id="nft_image" width="250" height="200" alt="NFT Image" hidden />
+  <video id="nft_video" width="250" height="200" alt="NFT Video" controls hidden />
+  <audio id="nft_audio" controls hidden />
+</p>
+<p id="content_info"></p>
+<p id="nft_info"></p>
+</body>
+</html>
