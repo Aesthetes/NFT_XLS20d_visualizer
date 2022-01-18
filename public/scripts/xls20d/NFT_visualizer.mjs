@@ -9,41 +9,7 @@ const ipfs_gateway_url = "https://gateway.pinata.cloud/ipfs/";
 function displayErrorInfo(_error, error_mode){
   setInnerHTML(error_mode, _error.message);
 }
-/*
-function displayMetadata(nft_metadata){
-  const ripple_network = getRadioButtonValue("ripple_network");
-  const blockchain_explorer_url = "https://" + 
-    ((ripple_network === "Testnet") ? "test." : "") + "bithomp.com/explorer/";
-  
-  var HTML_to_print = "<h3>NFT INFORMATIONS</h3>";
-  if(!isUndefinedOrNull(nft_metadata.name)){
-    HTML_to_print += "<b>Name:</b> " + nft_metadata.name + "<br><br>";
-  }
-  if(!isUndefinedOrNull(nft_metadata.author)){
-    HTML_to_print += "<b>Author:</b> " + nft_metadata.author + "<br><br>";
-  }
-  if(!isUndefinedOrNull(nft_metadata.description)){
-    HTML_to_print += "<b>Description:</b> " + nft_metadata.description + "<br><br>";
-  }
-  if(!isUndefinedOrNull(nft_metadata.metadata_cid)){
-    HTML_to_print += "Link to the NFT metadata: " + getLinkHTML(ipfs_gateway_url + nft_metadata.metadata_cid) + "<br>";
-  }
-  if(!isUndefinedOrNull(nft_metadata.actual_nft_owner)){
-    HTML_to_print += "Link to the owner account: " + getLinkHTML(blockchain_explorer_url + nft_metadata.actual_nft_owner) + "<br>";
-  }
-  if(!isUndefinedOrNull(nft_metadata.metadata_tx_hash)){
-    HTML_to_print += "Link to the Tx containing the metadata: " + getLinkHTML(blockchain_explorer_url + nft_metadata.metadata_tx_hash);
-  }
-  if(!isUndefinedOrNull(nft_metadata.detected_minter_obj) && !isUndefinedOrNull(nft_metadata.detected_minter_obj.value) &&
-    nft_metadata.detected_minter_obj.value.length > 0){
-    HTML_to_print += "<br>";
-    HTML_to_print += nft_metadata.detected_minter_obj.certified ? "(CERTIFIED)" : "(NOT CERTIFIED)";
-    HTML_to_print += " NFT minted by " + nft_metadata.detected_minter_obj.value;
-  }
-  
-  setInnerHTML("nft_info", HTML_to_print);
-}
-//*/
+
 function displayNFTInfo(nft_info_obj){
   //var HTML_to_print = "<h3>NFT INFORMATIONS</h3>" + JSONBeautify(nft_info_obj).replaceAll('\n', "<br>");
   
@@ -55,10 +21,11 @@ function displayNFTInfo(nft_info_obj){
   const name = metadata_obj["name"];
   const author_name = author_obj["name"];
   const description = metadata_obj["description"];
-  const issuer = metadata_obj["issuer"];
+  const NFToken_obj = nft_info_obj["NFToken_obj"];
+  const issuer = NFToken_obj["Issuer"];
   const actual_nft_issuer_link = "https://xls20.bithomp.com/explorer/" + issuer;
-  const taxon = metadata_obj["taxon"];
-  const seqnum = metadata_obj["seqnum"];
+  const taxon = NFToken_obj["TokenTaxon"];
+  const seqnum = NFToken_obj["nft_serial"];
   const metadata_link = nft_info_obj["metadata_link"];
   const content_link = nft_info_obj["content_link"];
   const actual_nft_owner = nft_info_obj["actual_nft_owner"];

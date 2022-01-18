@@ -545,7 +545,7 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   //*/
   
   const issuer_content_metadata = metadata_json["issuer"];
-  const taxon_content_metadata = Number(metadata_json["taxon"]);
+  const taxon_content_metadata = Number(metadata_json["taxon"] || 0); //if taxon is not defined in the metadata, then it's 0
   const seqnum_content_metadata = Number(metadata_json["seqnum"]);
   if(issuer_content_metadata !== issuer_address ||
     taxon_content_metadata !== taxon ||
