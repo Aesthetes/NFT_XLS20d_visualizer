@@ -95,3 +95,6 @@ yarn-error.log*
 firebase.json
 .firebaserc
 .firebase/
+
+#hashfilereader
+public/scripts/external/hashfilereader/
