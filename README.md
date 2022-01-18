@@ -1,5 +1,5 @@
 # NFT_XLS20d_visualizer
-An NFT visualizer for XRPL NFTs built on the XLS20 standard.
+An NFT visualizer for XRPL NFTs built on the XLS-20d standard.
 
 Built on Ubuntu 20.04 using firebase as a testing/local deployment environment.
 

@@ -96,5 +96,7 @@ firebase.json
 .firebaserc
 .firebase/
 
-#hashfilereader
-public/scripts/external/hashfilereader/
+#firebase files
+*.rules
+firestore.indexes.json
+
