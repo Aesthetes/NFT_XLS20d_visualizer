@@ -13,7 +13,7 @@ var corsOptions = {
   origin: true
 };
 _express.use(cors(corsOptions));
-
+//
 interface RPCRequestBody {
   method: string,
   params: any
