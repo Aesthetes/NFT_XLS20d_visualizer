@@ -1,14 +1,14 @@
 import { isUndefinedOrNull, fetchWithTimeout, printWithPrefix, JSONBeautify,
   deepCopyObject
-} from "./utils.mjs";
+} from "./../utils.mjs";
 
 import {
   callRestApi
-} from "./../firebase/functions_handler.mjs"
+} from "./../network_handler.mjs"
 
 var xrpl_testnet_obj = {client: null, network: "Testnet", watchdog_timer: null, is_wss: true, server_url: null};
 var xrpl_mainnet_obj = {client: null, network: "Mainnet", watchdog_timer: null, is_wss: true, server_url: null};
-var xrpl_xls20d_obj = {client: null, network: "XLS20d", watchdog_timer: null, is_wss: false, server_url: null};
+var xrpl_xls20d_obj = {client: null, network: "XLS20d", watchdog_timer: null, is_wss: true, server_url: null};
 
 const RPC_REQUEST_ENDPOINT = "xrpl_functions-WebApi/doRPCRequest";
 
@@ -133,24 +133,6 @@ function kickConnectionWatchdogTimer(xrpl_obj){
   setConnectionWatchdogTimer(xrpl_obj);
 }
 
-/*
-export const rippleApiRequest = async function(xrpl_obj, request_name, request_object){
-  const to_return = await xrpl_obj.client.request(request_name, request_object);
-  kickConnectionWatchdogTimer(xrpl_obj);
-  return to_return;
-}
-export const rippleApiGetBalances = async function(xrpl_obj, _address){
-  const to_return = await xrpl_obj.client.getBalances(_address);
-  kickConnectionWatchdogTimer(xrpl_obj);
-  return to_return;
-}
-export const rippleApiGetSettings = async function(xrpl_obj, _address){
-  const to_return = await xrpl_obj.client.getSettings(_address);
-  kickConnectionWatchdogTimer(xrpl_obj);
-  return to_return;
-}
-//*/
-
 export const logConnectionStatus = function(_xrpl_obj, _progressive_number){
   if(isUndefinedOrNull(_xrpl_obj)){
     printWithPrefix("_xrpl_obj is null", "logConnectionStatus: ");
@@ -254,7 +236,6 @@ async function findInPaginated(request_obj, data_field_name, searching_fields, x
       if(found){
         has_finished = true;
         to_return = objects_list[i];
-        console.log("findInPaginated(): to_return: ", to_return);
         break;
       }
     }
@@ -422,6 +403,30 @@ function NFTokenFlagsToNumber(flags){
   }
   
   return number_to_return;
+}
+
+export const NFTokenFlagsNumberToFlags = function(flags_number){
+  var flags = {
+    "tfBurnable": false,
+    "tfOnlyXRP": false,
+    "tfTrustLine": false,
+    "tfTransferable": false
+  };
+  
+  if((flags_number & 0x00000001) !== 0){
+    flags["tfBurnable"] = true;
+  }
+  if((flags_number & 0x00000002) >> 1 !== 0){
+    flags["tfOnlyXRP"] = true;
+  }
+  if((flags_number & 0x00000004) >> 2 !== 0){
+    flags["tfTrustLine"] = true;
+  }
+  if((flags_number & 0x00000008) >> 3 !== 0){
+    flags["tfTransferable"] = true;
+  }
+  
+  return flags;
 }
 
 /*

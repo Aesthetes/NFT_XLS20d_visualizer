@@ -2,10 +2,10 @@ import {
   isUndefinedOrNull, fetchMultiple, isNumberIncluded, arrayMatchesAll,
   sortObjectKeys, countGroups, getCurrentTimestamp, deepCopyObject,
   objectToBlob, extractFromObject, writeIntoObject, JSONBeautify
-} from "./utils.mjs";
+} from "./../utils.mjs";
 import { 
   getCorrectXRPLClientObj, connectToAServer, logConnectionStatus,
-  getNFToken, getAccountInfo
+  getNFToken, getAccountInfo, NFTokenFlagsNumberToFlags
 } from "./xrpl_handler.mjs";
 import {
   getTomlFile, extractObjectsFromTOML, verifyAccountDomain
@@ -14,17 +14,15 @@ import {
   handleFiles as hashfilereaderHandleFiles, clear as hashfilereaderClear
 } from "./../external/hashfilereader/index.mjs";
 
-const DEFAULT_DOMAIN = "aesthetes.art";
-//const DEFAULT_DOMAIN = "127.0.0.1:8080";
-
+const DEFAULT_DOMAIN = "xrpl.aesthetes.art";
 const HASH_URI_FIELD_NAME = "0x64_SHA256";
 
 function generateTOMLURL(_domain){
   return "https://" + _domain + "/.well-known/xrp-ledger.toml";
 }
 
-//const DEFAULT_TOML_URL = generateTOMLURL(DEFAULT_DOMAIN);
-const DEFAULT_TOML_URL = "./../../.well-known/xrp-ledger.toml";
+const DEFAULT_TOML_URL = generateTOMLURL(DEFAULT_DOMAIN);
+//const DEFAULT_TOML_URL = "./../../.well-known/xrp-ledger.toml";
 
 function extractUrisFromString(uris_string){
   var uris_obj = {};
@@ -57,15 +55,10 @@ function hexUriToUrisObj(nftoken_uri_hex){
   var remaining_nftoken_uri_hex = nftoken_uri_hex;
   
   while(remaining_nftoken_uri_hex.length > 0){
-    //console.log("hexUriToUrisObj(): remaining_nftoken_uri_hex = " + remaining_nftoken_uri_hex);
     if(remaining_nftoken_uri_hex.startsWith(xrpl.convertStringToHex("0x"))){ //if the next field is hex_formatted
-      //console.log("hexUriToUrisObj(): CHECKPOINT #1");
       let first_colon_index = remaining_nftoken_uri_hex.indexOf(xrpl.convertStringToHex(':'));
-      //console.log("hexUriToUrisObj(): #1 first_colon_index = " + first_colon_index);
       let key_hex = remaining_nftoken_uri_hex.substring(0, first_colon_index);
-      //console.log("hexUriToUrisObj(): #1 key_hex = " + key_hex);
       let key = xrpl.convertHexToString(key_hex);
-      //console.log("hexUriToUrisObj(): #1 key = " + key);
       
       let remaining_key = key.substring(2, key.length);
       let first_key_underscore_index = remaining_key.indexOf('_');
@@ -83,7 +76,6 @@ function hexUriToUrisObj(nftoken_uri_hex){
       );
     }
     else{ //if the next field is not hex_formatted
-      //console.log("hexUriToUrisObj(): CHECKPOINT #2");
       let first_endline_index = remaining_nftoken_uri_hex.indexOf("0A");
       if(first_endline_index < 0){
         first_endline_index = remaining_nftoken_uri_hex.length;
@@ -111,29 +103,22 @@ function hexUriToUrisObj(nftoken_uri_hex){
 }
 
 function extractUrisFromNFToken(NFToken_obj){
-  //console.log("extractUrisFromNFToken(): CHECKPOINT START");
   var uris_obj = {};
   uris_obj["Issuer"] = NFToken_obj["Issuer"];
   uris_obj["TokenTaxon"] = Number(NFToken_obj["TokenTaxon"]);
   uris_obj["TokenSeq"] = Number(NFToken_obj["TokenID"].substring(NFToken_obj["TokenID"].length - 8, NFToken_obj["TokenID"].length));
   uris_obj["TokenID"] = NFToken_obj["TokenID"];
   
-  //console.log("extractUrisFromNFToken(): CHECKPOINT #1");
-  
   //parse the uri field
   const nftoken_uri_hex = NFToken_obj.URI;
-  //console.log("extractUrisFromNFToken(): nftoken_uri_hex = " + nftoken_uri_hex);
   if(!isUndefinedOrNull(nftoken_uri_hex) && nftoken_uri_hex.length > 0){ //if the URI field is present
-    //console.log("extractUrisFromNFToken(): CHECKPOINT #1.1");
     let extracted_uris_obj = hexUriToUrisObj(nftoken_uri_hex);
-    //console.log("extractUrisFromNFToken(): CHECKPOINT #1.2");
     
     uris_obj = {
       ...uris_obj,
       ...extracted_uris_obj
     };
   }
-  //console.log("extractUrisFromNFToken(): CHECKPOINT #2");
   return uris_obj;
 }
 
@@ -206,15 +191,10 @@ function SHA256CalculationCallback(SHA_256_hash, sha_256_obj){
     throw new Error("SHA256CalculationCallback(): sha_256_obj is "+ sha_256_obj);
   }
   
-  //obj_to_return_wrapper["obj_to_return"]["calculated_hashes"][obj_to_return_wrapper["file_type"]] = SHA_256_hash;
   sha_256_obj["sha_256"] = SHA_256_hash;
 }
 
 async function doCalculateSHA256Tee(metadata_blob, file_type){
-  //console.log("doCalculateSHA256Tee(): START");
-  //console.log("doCalculateSHA256Tee(): typeof metadata_blob = " + typeof metadata_blob);
-  //calculate the SHA256 hash of the file
-  //const metadata_blob = await metadata_obj.response.blob();
   const metadata_file_to_hash = new File([metadata_blob], "name");
   const sha_256_obj = {
     file_type: file_type
@@ -223,14 +203,11 @@ async function doCalculateSHA256Tee(metadata_blob, file_type){
   const calculated_sha_256 = sha_256_obj["sha_256"];
   
   //retrieve the JSON-formatted content of the file
-  //console.log("doCalculateSHA256Tee(): CHECKPOINT #1");
   const metadata_object_url = URL.createObjectURL(metadata_blob);
-  //console.log("doCalculateSHA256Tee(): CHECKPOINT #2");
   const metadata_obj_2 = await fetchMultiple([metadata_object_url], {timeout: 10 * 1000});
   if(isUndefinedOrNull(metadata_obj_2) || isUndefinedOrNull(metadata_obj_2.response)){ //if no metadata file was retrieved
     throw new Error("Unable to retrieve " + file_type);
   }
-  //console.log("doCalculateSHA256Tee(): CHECKPOINT #3");
   
   var return_obj = {
     metadata_obj: metadata_obj_2,
@@ -305,10 +282,6 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   
   var xrpl_obj = getCorrectXRPLClientObj(network);
   xrpl_obj.is_wss = true;
-  //logConnectionStatus(ripple_api_obj, 1);
-  
-  //TODO wrap any function in a function that tries all the different servers
-  //xrpl_obj.server_url = "http://xls20-sandbox.rippletest.net:51234";
   
   if(xrpl_obj.is_wss){ //if it's a wss connection
     if(isUndefinedOrNull(xrpl_obj.client) || !xrpl_obj.client.isConnected()){//if we're not connected to a rippled server (for this network)
@@ -330,16 +303,13 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   ...
   //*/
   
-  console.log("NFToken_obj: ", NFToken_obj);
-  
   //extract the issuer address from the NFToken
   const issuer_address = NFToken_obj["Issuer"];
-  //var issuer_address = NFToken_obj["Issuer"]; //TODO: TO DELETE
   if(isUndefinedOrNull(issuer_address)){
     throw new Error("NFT has no issuer");
   }
   
-  //extract the taxon from the NFToken
+  //extract the sequence number from the NFToken
   const seqnum = NFToken_obj["nft_serial"];
   if(isUndefinedOrNull(seqnum)){
     throw new Error("NFT has no sequence number");
@@ -351,23 +321,29 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
     throw new Error("NFT has no taxon");
   }
   
+  //extract the flags from the NFToken
+  const flags = NFToken_obj["Flags"];
+  if(isUndefinedOrNull(flags)){
+    throw new Error("NFT has no flags");
+  }
+  const flags_obj = NFTokenFlagsNumberToFlags(flags);
+  
   //get issuer's account_info from XRPL
   const issuer_account_info = await getAccountInfo(issuer_address, xrpl_obj);
   if(isUndefinedOrNull(issuer_account_info)){
     throw new Error("Issuer info not found");
   }
-  console.log("issuer_account_info: ", issuer_account_info);
   
   //get the domain
   const issuer_account_domain_hex = issuer_account_info.Domain;
-  //const issuer_account_domain_hex = xrpl.convertStringToHex(DEFAULT_TOML_URL); //TODO: TO DELETE
   var issuer_account_domain = null;
   var is_default_TOML = false;
   if(isUndefinedOrNull(issuer_account_domain_hex)){
-    obj_to_return.warnings.push("NoDomain");
+    obj_to_return.warnings.push("NoIssuerDomain");
   }
   else{
     issuer_account_domain = xrpl.convertHexToString(issuer_account_domain_hex);
+    obj_to_return["issuer_domain"] = issuer_account_domain;
   }
   
   var toml_file_url = null;
@@ -375,7 +351,6 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   if(!isUndefinedOrNull(issuer_account_domain)){ //if the issuer address has a domain specified
     //get the TOML file
     toml_file_url = generateTOMLURL(issuer_account_domain);
-    //toml_file_url = DEFAULT_TOML_URL; //TODO TO DELETE
     issuer_toml_text = await getTomlFile(toml_file_url);
   }
   
@@ -393,7 +368,6 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   
   //after finally fetching a valid TOML file  
   var extracted_toml_objects = await extractObjectsFromTOML(issuer_toml_text);
-  console.log("extracted_toml_objects: ", extracted_toml_objects);
   
   //perform issuer account verification  
   if(is_default_TOML ||
@@ -401,18 +375,15 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
     isUndefinedOrNull(extracted_toml_objects["ACCOUNTS"]) ||
     extracted_toml_objects["ACCOUNTS"].length === 0
   ){ //if there's no TOML file OR there's no account list inside the issuer's TOML file
-    console.log("getNFTInfo(): CHECKPOINT #0.0.1");
     obj_to_return["warnings"].push("IssuerNotVerified"); //produce a warning
   }
   else{ //if there's an account list inside the issuer's TOML file
     //see if it's verified
-    console.log("getNFTInfo(): CHECKPOINT #0.0.2");
     let is_verified = verifyAccountDomain(extracted_toml_objects["ACCOUNTS"], issuer_address, network);
     if(!is_verified){ //if it's not verified
       obj_to_return["warnings"].push("IssuerNotVerified"); //produce a warning
     }
   }
-  console.log("getNFTInfo(): CHECKPOINT #0.1");
   
   //try to fetch a valid URI resolution list
   if(isUndefinedOrNull(extracted_toml_objects) ||
@@ -420,7 +391,6 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
     isUndefinedOrNull(extracted_toml_objects["URI_RESOLUTION"]["list"]) ||
     extracted_toml_objects["URI_RESOLUTION"]["list"].length == 0
   ){ //if the TOML file does not contain any URI resolution list
-    console.log("getNFTInfo(): CHECKPOINT #0.1.1");
     if(is_default_TOML){ //if it's the default one
       throw new Error("Unable to retrieve a valid TOML file with an URI resolution list");
     }
@@ -436,8 +406,7 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
     is_default_TOML = true;
     
     //extract the fields from it
-    extracted_toml_objects = await extractObjectsFromTOML(issuer_toml_text);
-      
+    extracted_toml_objects = await extractObjectsFromTOML(issuer_toml_text); 
     if(isUndefinedOrNull(extracted_toml_objects) ||
       isUndefinedOrNull(extracted_toml_objects["URI_RESOLUTION"]) ||
       isUndefinedOrNull(extracted_toml_objects["URI_RESOLUTION"]["list"]) ||
@@ -446,21 +415,15 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
       throw new Error("Unable to retrieve a valid TOML file with an URI resolution list");
     }
   }
-  console.log("getNFTInfo(): CHECKPOINT #0.2");
   
   //after finally fetching a valid URI resolution list
   //fetch the metadata
-  console.log("getNFTInfo(): CHECKPOINT #0.2.0");
   const NFToken_uris_obj = extractUrisFromNFToken(NFToken_obj);
-  console.log("getNFTInfo(): NFToken_uris_obj: ", NFToken_uris_obj);
   const composed_metadata_links = composeLinks(extracted_toml_objects, NFToken_uris_obj);
-  console.log("getNFTInfo(): composed_metadata_links: ", composed_metadata_links);
   const metadata_obj = await fetchMultiple(composed_metadata_links, {timeout: 10 * 1000});
-  //console.log("getNFTInfo(): metadata_obj: ", metadata_obj);
   if(isUndefinedOrNull(metadata_obj) || isUndefinedOrNull(metadata_obj.response)){ //if no metadata file was retrieved
     throw new Error("Unable to retrieve the content metadata");
   }
-  console.log("getNFTInfo(): CHECKPOINT #0.3");
   //if a metadata file was retrieved
   
   var used_unchecked_resolution_links = [];
@@ -469,13 +432,9 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   var _metadata_obj = null;
   if(!isUndefinedOrNull(metadata_SHA256)){ //if SHA256 is present in the URI
     //calculate the SHA256 hash of the metadata file    
-    console.log("getNFTInfo(): CHECKPOINT #0.4.1");
-    
     let file_type = "content_metadata";
     let metadata_blob = await metadata_obj.response.blob();
-    //console.log("getNFTInfo(): metadata_blob: ", metadata_blob);
     let sha_256_obj = await doCalculateSHA256Tee(metadata_blob, file_type);
-    //console.log("getNFTInfo(): sha_256_obj: ", sha_256_obj);
     let calculated_sha_256 = sha_256_obj["sha_256"];
     if(metadata_SHA256 !== calculated_sha_256){
       throw new Error("The SHA256 of " + file_type + " is different than the claimed one");
@@ -485,14 +444,11 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   }
   else{ //if SHA256 is not present in the URI
     //update the list of used unchecked sources for data retrieval
-    console.log("getNFTInfo(): CHECKPOINT #0.4.2");
-    
     let metadata_resolution_link = extracted_toml_objects["URI_RESOLUTION"]["list"][metadata_obj.resource_index];
     used_unchecked_resolution_links.push(metadata_resolution_link);
     
     _metadata_obj = metadata_obj;
   }
-  console.log("getNFTInfo(): CHECKPOINT #0.5");
   
   const metadata_json = await _metadata_obj.response.json();
   
@@ -510,12 +466,10 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   if(isUndefinedOrNull(metadata_author_type)){ //if the content's metadata has no author.type field
     metadata_author_type = "Simple";
   }
-  console.log("getNFTInfo(): CHECKPOINT #1");
   
   /*
   ...
   //*/
-  console.log("getNFTInfo(): CHECKPOINT #2");
   
   //backward-compatibility for "image" field
   if(isUndefinedOrNull(metadata_json["content"])){ //if the "content" field is not defined
@@ -532,9 +486,9 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   if(!is_content_metadata_ok){
     throw new Error("Something's wrong with the content metadata");
   }
-  console.log("getNFTInfo(): CHECKPOINT #3");
   
   obj_to_return["NFToken_obj"] = NFToken_obj;
+  obj_to_return["NFToken_flags"] = flags_obj;
   obj_to_return["NFToken_uris_obj"] = NFToken_uris_obj;
   obj_to_return["metadata"] = metadata_json; //name, author, description
   obj_to_return["metadata_link"] = metadata_obj.url;
@@ -550,18 +504,9 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   if(issuer_content_metadata !== issuer_address ||
     taxon_content_metadata !== taxon ||
     seqnum_content_metadata !== seqnum){ //if the NFToken info doesn't match those in the content metadata
-    console.log("typeof issuer_content_metadata = " + typeof issuer_content_metadata); console.log("typeof issuer_address = " + typeof issuer_address);
-    console.log(issuer_content_metadata === issuer_address);
-    console.log("typeof taxon_content_metadata = " + typeof taxon_content_metadata); console.log("typeof taxon = " + typeof taxon);
-    console.log(taxon_content_metadata === taxon);
-    console.log("typeof seqnum_content_metadata = " + typeof seqnum_content_metadata); console.log("typeof seqnum = " + typeof seqnum);
-    console.log(seqnum_content_metadata === seqnum);
-    
     throw new Error("The NFToken issuer address, taxon and sequence number doesn't match those found in the content metadata");
   }
   //if the NFToken info matches those in the content metadata 
-  
-  console.log("getNFTInfo(): CHECKPOINT #4");
   
   //fetch the content
   const content_uris_obj = extractUrisFromMetadata(metadata_json, "content");
@@ -570,7 +515,6 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   if(isUndefinedOrNull(content_obj) || isUndefinedOrNull(content_obj.response)){ //if no content file was retrieved
     throw new Error("Unable to retrieve the content");
   }
-  console.log("getNFTInfo(): CHECKPOINT #5");
   //if a content file was retrieved
   
   //retrieve the blob content of the file
@@ -579,7 +523,6 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   
   const content_SHA256 = content_uris_obj[HASH_URI_FIELD_NAME];
   if(!isUndefinedOrNull(content_SHA256)){ //if SHA256 is present in the URI
-    console.log("getNFTInfo(): CHECKPOINT #5.1");
     //calculate the SHA256 hash of the content file
     let file_type = "content";
     let sha_256_obj = await doCalculateSHA256Tee(content_blob, file_type);
@@ -589,12 +532,10 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
     }
   }
   else{ //if SHA256 is not present in the URI
-    console.log("getNFTInfo(): CHECKPOINT #5.2");
     //update the list of used sources for data retrieval
     const content_resolution_link = extracted_toml_objects["URI_RESOLUTION"]["list"][content_obj.resource_index];
     used_unchecked_resolution_links.push(content_resolution_link);
   }
-  console.log("getNFTInfo(): CHECKPOINT #6");
   
   obj_to_return["content_object_url"] = content_object_url;
   obj_to_return["content_link"] = content_obj.url;

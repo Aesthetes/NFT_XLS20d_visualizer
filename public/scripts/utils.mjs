@@ -311,9 +311,6 @@ const fetchRecursive = async function(resources_list, resource_index, options = 
     return null;
   }
   
-  let prefix = "fetchRecursive(): " + resources_list[resource_index] + ": ";
-  console.log(prefix + "fetching..."); 
-  
   var response = null;  
   const url = resources_list[resource_index];
   
@@ -632,5 +629,18 @@ export const objectToBlob = function(_object){
   return blob;
 }
 
-
+export const retrieveUrlParameters = function(){
+  var qd = {};
+  if (location.search){
+    location.search.substr(1).split("&").forEach(function(item) {
+      var s = item.split("=");
+      var k = s[0];
+      var v = s[1] && decodeURIComponent(s[1]); //  null-coalescing / short-circuit
+      //(k in qd) ? qd[k].push(v) : qd[k] = [v]
+      (qd[k] = qd[k] || []).push(v); // null-coalescing / short-circuit
+    });
+  }
+  
+  return qd;
+}
 

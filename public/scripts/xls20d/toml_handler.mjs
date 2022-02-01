@@ -1,6 +1,6 @@
 import {
   isUndefinedOrNull, fetchWithTimeout
-} from "./utils.mjs";
+} from "./../utils.mjs";
 
 export const extractObjectsFromTOML = async function(toml_text){
   const parsed_toml = toml_bundle.parseTOML(toml_text);  

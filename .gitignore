@@ -101,3 +101,5 @@ firestore.rules
 firestore.indexes.json
 functions/
 
+docs/
+
