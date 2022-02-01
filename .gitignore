@@ -102,4 +102,5 @@ firestore.indexes.json
 functions/
 
 docs/
+public/.well-known/
 

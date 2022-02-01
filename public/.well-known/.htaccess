@@ -1,3 +1,0 @@
-<Files "xrp-ledger.toml">
-    Header set Access-Control-Allow-Origin "*"
-</Files>
