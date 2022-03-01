@@ -91,7 +91,7 @@ async function handleVisualizeClick(){
     }
     //displayMetadata(nft_info);
     displayNFTInfo(nft_info);
-    //console.log("nft_info: ", JSONBeautify(nft_info));
+    console.log("nft_info: ", nft_info);
     
     error_mode = "content_info";
     

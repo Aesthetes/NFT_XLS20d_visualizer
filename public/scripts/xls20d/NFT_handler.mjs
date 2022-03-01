@@ -103,6 +103,7 @@ function hexUriToUrisObj(nftoken_uri_hex){
 }
 
 function extractUrisFromNFToken(NFToken_obj){
+  //console.log("extractUrisFromNFToken(): NFToken_obj: ", NFToken_obj);
   var uris_obj = {};
   uris_obj["Issuer"] = NFToken_obj["Issuer"];
   uris_obj["TokenTaxon"] = Number(NFToken_obj["TokenTaxon"]);

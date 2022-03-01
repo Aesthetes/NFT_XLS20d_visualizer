@@ -305,7 +305,7 @@ export const fetchWithTimeout = async function(resource, options = {}) {
   return response;
 }
 
-const fetchRecursive = async function(resources_list, resource_index, options = {}){
+const fetchRecursive = async function(resources_list, resource_index, options){
   //console.log("fetchRecursive(): ", resources_list, resource_index, options);
   if(resource_index >= resources_list.length){
     return null;
@@ -316,7 +316,7 @@ const fetchRecursive = async function(resources_list, resource_index, options = 
   
   try{
     const _response = await fetchWithTimeout(url, options);
-    //console.log(prefix + "_response: ", _response);
+    //console.log("fetchRecursive(): _response: ", _response);
     if(!_response.ok){
       //console.log(prefix + " _response.ok = " + _response.ok);
       throw new Error("fetch response is not ok");
@@ -324,11 +324,10 @@ const fetchRecursive = async function(resources_list, resource_index, options = 
     response = _response;
   }
   catch(error){
-    console.log(prefix + url + " KO");
-    response = await fetchRecursive(resources_list, resource_index + 1, options);
+    //console.log("fetchRecursive(): " + url + " KO");
+    return fetchRecursive(resources_list, resource_index + 1, options);
   }
   
-  //console.log(prefix + "returning ", response);
   return {
     response: response,
     url: url,
@@ -339,7 +338,7 @@ const fetchRecursive = async function(resources_list, resource_index, options = 
 export const fetchMultiple = async function(resources_list, options = {}){
   //console.log("fetchMultiple(): ", resources_list, options);
   const result_obj = await fetchRecursive(resources_list, 0, options);
-  //console.log("fetchMultiple(): returning ", result);
+  //console.log("fetchMultiple(): returning ", result_obj);
   return result_obj;
 }
 
