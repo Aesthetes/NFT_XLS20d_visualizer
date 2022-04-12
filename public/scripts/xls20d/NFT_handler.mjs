@@ -106,10 +106,12 @@ function extractUrisFromNFToken(NFToken_obj){
   //console.log("extractUrisFromNFToken(): NFToken_obj: ", NFToken_obj);
   var uris_obj = {};
   uris_obj["Issuer"] = NFToken_obj["Issuer"];
-  uris_obj["TokenTaxon"] = Number(NFToken_obj["TokenTaxon"]);
+  uris_obj["TokenTaxon"] = Number(NFToken_obj["NFTokenTaxon"]); //backward-compatibility
+  uris_obj["NFTokenTaxon"] = Number(NFToken_obj["NFTokenTaxon"]);
   //uris_obj["TokenSeq"] = Number(NFToken_obj["TokenID"].substring(NFToken_obj["TokenID"].length - 8, NFToken_obj["TokenID"].length));
   uris_obj["TokenSeq"] = NFToken_obj["nft_serial"];
-  uris_obj["TokenID"] = NFToken_obj["TokenID"];
+  uris_obj["TokenID"] = NFToken_obj["NFTokenID"]; //backward-compatibility
+  uris_obj["NFTokenID"] = NFToken_obj["NFTokenID"];
   
   //parse the uri field
   const nftoken_uri_hex = NFToken_obj.URI;
@@ -296,7 +298,7 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   }
   
   //get the NFToken from XRPL
-  const NFToken_obj = await getNFToken(nft_owner_address, nft_id, xrpl_obj);
+  var NFToken_obj = await getNFToken(nft_owner_address, nft_id, xrpl_obj);
   if(isUndefinedOrNull(NFToken_obj)){
     throw new Error("NFT not found");
   }
@@ -321,7 +323,9 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   const taxon = NFToken_obj["NFTokenTaxon"];
   if(isUndefinedOrNull(taxon)){
     throw new Error("NFT has no taxon");
-  }
+  }  
+  //backward-compatibility
+  NFToken_obj["TokenTaxon"] = taxon;
   
   //extract the flags from the NFToken
   const flags = NFToken_obj["Flags"];
