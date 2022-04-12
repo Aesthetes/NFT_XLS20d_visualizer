@@ -76,7 +76,7 @@ function hexUriToUrisObj(nftoken_uri_hex){
       );
     }
     else{ //if the next field is not hex_formatted
-      let first_endline_index = remaining_nftoken_uri_hex.indexOf("0A");
+      let first_endline_index = remaining_nftoken_uri_hex.indexOf("0A"); // '\n'
       if(first_endline_index < 0){
         first_endline_index = remaining_nftoken_uri_hex.length;
       }
@@ -107,7 +107,8 @@ function extractUrisFromNFToken(NFToken_obj){
   var uris_obj = {};
   uris_obj["Issuer"] = NFToken_obj["Issuer"];
   uris_obj["TokenTaxon"] = Number(NFToken_obj["TokenTaxon"]);
-  uris_obj["TokenSeq"] = Number(NFToken_obj["TokenID"].substring(NFToken_obj["TokenID"].length - 8, NFToken_obj["TokenID"].length));
+  //uris_obj["TokenSeq"] = Number(NFToken_obj["TokenID"].substring(NFToken_obj["TokenID"].length - 8, NFToken_obj["TokenID"].length));
+  uris_obj["TokenSeq"] = NFToken_obj["nft_serial"];
   uris_obj["TokenID"] = NFToken_obj["TokenID"];
   
   //parse the uri field
@@ -317,7 +318,7 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   }
   
   //extract the taxon from the NFToken
-  const taxon = NFToken_obj["TokenTaxon"];
+  const taxon = NFToken_obj["NFTokenTaxon"];
   if(isUndefinedOrNull(taxon)){
     throw new Error("NFT has no taxon");
   }

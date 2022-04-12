@@ -223,6 +223,7 @@ async function findInPaginated(request_obj, data_field_name, searching_fields, x
     
     var response_data = await doRequest(current_request, xrpl_obj);
     var objects_list = response_data[data_field_name];
+    console.log(objects_list);
     
     for(let i = 0; i < objects_list.length; i++){
       let found = true;
@@ -258,7 +259,7 @@ export const getNFToken = async function(nft_owner_address, nft_id, xrpl_obj){
   };
   
   const searching_fields = [
-    {key: "TokenID", value: nft_id}
+    {key: "NFTokenID", value: nft_id}
   ];
   
   return findInPaginated(request_obj, "account_nfts", searching_fields, xrpl_obj);
