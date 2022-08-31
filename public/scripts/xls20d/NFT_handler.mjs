@@ -434,7 +434,10 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   
   var used_unchecked_resolution_links = [];
   
-  const metadata_SHA256 = NFToken_uris_obj[HASH_URI_FIELD_NAME];
+  //TODO TO RESTORE
+  //const metadata_SHA256 = NFToken_uris_obj[HASH_URI_FIELD_NAME];
+  const metadata_SHA256 = null;
+  
   var _metadata_obj = null;
   if(!isUndefinedOrNull(metadata_SHA256)){ //if SHA256 is present in the URI
     //calculate the SHA256 hash of the metadata file    
@@ -524,10 +527,16 @@ export const getNFTInfo = async function(nft_owner_address, nft_id, network){
   //if a content file was retrieved
   
   //retrieve the blob content of the file
+  console.log("getNFTInfo(): retrieving content_blob...");
   const content_blob = await content_obj.response.blob();
+  console.log("getNFTInfo(): content_blob: ", content_blob);
   const content_object_url = URL.createObjectURL(content_blob);
+  console.log("getNFTInfo(): content_object_url: ", content_object_url);
   
-  const content_SHA256 = content_uris_obj[HASH_URI_FIELD_NAME];
+  //TODO TO RESTORE
+  //const content_SHA256 = content_uris_obj[HASH_URI_FIELD_NAME];
+  const content_SHA256 = null;
+  
   if(!isUndefinedOrNull(content_SHA256)){ //if SHA256 is present in the URI
     //calculate the SHA256 hash of the content file
     let file_type = "content";

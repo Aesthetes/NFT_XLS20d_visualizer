@@ -11,6 +11,7 @@ const ipfs_gateway_url = "https://gateway.pinata.cloud/ipfs/";
 var is_xapp = null;
 
 function displayErrorInfo(_error, error_mode){
+  console.log(_error);
   setInnerHTML(error_mode, _error.message);
 }
 

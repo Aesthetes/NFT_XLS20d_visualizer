@@ -324,7 +324,7 @@ const fetchRecursive = async function(resources_list, resource_index, options){
     response = _response;
   }
   catch(error){
-    //console.log("fetchRecursive(): " + url + " KO");
+    console.log("fetchRecursive(): " + url + " KO");
     return fetchRecursive(resources_list, resource_index + 1, options);
   }
   
@@ -338,7 +338,7 @@ const fetchRecursive = async function(resources_list, resource_index, options){
 export const fetchMultiple = async function(resources_list, options = {}){
   //console.log("fetchMultiple(): ", resources_list, options);
   const result_obj = await fetchRecursive(resources_list, 0, options);
-  //console.log("fetchMultiple(): returning ", result_obj);
+  console.log("fetchMultiple(): returning ", result_obj);
   return result_obj;
 }
 
